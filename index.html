@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="css/style.css">
+  <title>Репозиск - найдется все</title>
+</head>
+
+<body>
+
+  <div class="searcher">
+    <form class="searcher__form" action="">
+      <input class="searcher__input" type="text" name="input" minlength="3" required>
+      <button class="searcher__btn" name="button">Поиск</button>
+    </form>
+    <div class="searcher__result-box">
+      <ul class="searcher__list">
+      </ul>
+    </div>
+    <div class="searcher__error-box"></div>
+  </div>
+
+  <script>
+
+    let error_box = document.querySelector(".searcher__error-box");
+    let result_list = document.querySelector(".searcher__list");
+    let form = document.querySelector(".searcher__form");
+    let input = form.input;
+    let button = form.button;
+
+    function clickButton(event, str) {
+      event.preventDefault();
+      error_box.innerHTML = "";
+      result_list.innerHTML = "";
+      let url = "https://api.github.com/search/repositories?";
+      let per_page = "per_page=10";
+      let str_encode = encodeURIComponent(str);
+      let qualifier = encodeURIComponent("in:name");
+      url = url + per_page + "&q=" + str_encode + "+" + qualifier;
+
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+
+          if (data.total_count == 0) {
+            error_box.innerText = "Ничего не найдено";
+          }
+
+          let counter = 0;
+
+          for (let item of data.items) {
+            counter++;
+
+            if (counter == data.total_count) break;
+
+            let list_item = createElement("li", "searcher__item");
+            let item_name = createLink("searcher__link", item.html_url, item.name);
+            let item_owner = createElement("p", "searcher__property", " (автор: " + item.owner.login);
+            let item_lang = createElement("p", "searcher__property", ", язык: " + item.language + ")");
+            list_item.append(item_name, item_owner, item_lang); result_list.append(list_item);
+          }
+        }).catch((e) => error_box.innerText = "Ошибка");
+    }
+
+    function createElement(tag, class_name, value = "") {
+      value = value.replace("null", "не известен");
+      let elem = document.createElement(tag);
+      elem.className = class_name;
+      elem.innerText = value;
+      return elem;
+    }
+
+    function createLink(class_name, link, value = "") {
+      let elem = createElement("a", class_name, value);
+      elem.target = "_blank";
+      elem.href = link;
+      return elem;
+    }
+
+    form.addEventListener("submit", (event) => clickButton(event, input.value));
+  </script>
+
+</body>
+
+</html>
