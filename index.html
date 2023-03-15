@@ -42,18 +42,9 @@
       fetch(url)
         .then(response => response.json())
         .then(data => {
-
-          if (data.total_count == 0) {
-            error_box.innerText = "Ничего не найдено";
-          }
-
-          let counter = 0;
+          if (data.total_count == 0) error_box.innerText = "Ничего не найдено";
 
           for (let item of data.items) {
-            counter++;
-
-            if (counter == data.total_count) break;
-
             let list_item = createElement("li", "searcher__item");
             let item_name = createLink("searcher__link", item.html_url, item.name);
             let item_owner = createElement("p", "searcher__property", " (автор: " + item.owner.login);
